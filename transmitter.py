@@ -48,7 +48,7 @@ class Transmitter(Thread):
 	
 	def run(self):
 		self.logger.log("transmitter on");
-		self.get_last_datetime() #and self.collect_data() and self.upload_data()
+		self.get_last_datetime2() and self.collect_data() and self.upload_data()
 		self.logger.log("transmitter off");
 		self.logger.close()
 
@@ -68,6 +68,11 @@ class Transmitter(Thread):
 		else:
 			self.logger.log("failed to get last datetime!!")
 			return False
+	
+	def get_last_datetime2(self):
+		self.start_datetime = datetime.datetime.strptime("2016-11-14 00:00:00", "%Y-%m-%d %H:%M:%S")
+		self.end_datetime = datetime.datetime.strptime("2016-11-14 01:00:00", "%Y-%m-%d %H:%M:%S")
+		return True
 
 	def collect_data(self):
 		# connection = network.HTTPSConnection(localserver_hostname)
@@ -129,6 +134,7 @@ if __name__ == "__main__":
 		for group in config_data:
 			# run/trigger transmitter
 			Transmitter(group).start()
+			break;
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
 	except Exception as e:
