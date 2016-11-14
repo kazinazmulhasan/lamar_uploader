@@ -1,0 +1,103 @@
+# any line starting with # is a comment
+# 
+# data format:
+# A -> B
+# X1 X2 X3 -> Y
+# 
+# A is the name of the database/table in local server
+# B is the name of the table in web server database
+# X1, X2, X3 are the name of the cols which value will
+# 	be collected and added together. Afterward the 
+# 	calculated value will be uploaded as value of Y
+
+Barn -> barn
+PPPIII -> power
+VLLIII -> voltage
+
+Bathhouse -> bathhouse
+PPPIII -> power
+VLLIII -> voltage
+
+BuffaloKeepersHouse -> buffalokeepershouse
+PPPIII -> power
+VLLIII -> voltage
+
+Bunkhouse -> bunkhouse
+PPPIII -> power
+VLLIII -> voltage
+
+DirectorsCabin -> directorscabin
+PPPIII -> power
+VLLIII -> voltage
+
+SodaButteRangerStation -> sodabutterangerstation
+PPPIII -> power
+VLLIII -> voltage
+
+TrailLights_Cabin16-15 -> traillights
+PPPIII -> power
+VLLIII -> voltage
+
+Cabin2-3-1 -> cabin1
+PP -> power
+V -> voltage
+
+Cabin2-3-1 -> cabin2
+PP -> power
+V -> voltage
+
+Cabin2-3-1 -> cabin3
+PP -> power
+V -> voltage
+
+Cabin6-5-4 -> cabin4
+PP -> power
+V -> voltage
+
+Cabin6-5-4 -> cabin5
+PP -> power
+V -> voltage
+
+Cabin6-5-4 -> cabin6
+PP -> power
+V -> voltage
+
+Cabin9-8-7 -> cabin7
+PP -> power
+V -> voltage
+
+Cabin9-8-7 -> cabin8
+PP -> power
+V -> voltage
+
+Cabin9-8-7 -> cabin9
+PP -> power
+V -> voltage
+
+Cabin11-10_Spare -> cabin10
+PP -> power
+V -> voltage
+
+Cabin11-10_Spare -> cabin11
+PP -> power
+V -> voltage
+
+Cabin14-13-12 -> cabin12
+PP -> power
+V -> voltage
+
+Cabin14-13-12 -> cabin13
+PP -> power
+V -> voltage
+
+Cabin14-13-12 -> cabin14
+PP -> power
+V -> voltage
+
+TrailLights_Cabin16-15 -> cabin15
+PP -> power
+V -> voltage
+
+TrailLights_Cabin16-15 -> cabin16
+PP -> power
+V -> voltage
