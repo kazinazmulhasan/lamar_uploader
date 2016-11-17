@@ -116,10 +116,12 @@ class Transmitter(Thread):
 
 if __name__ == "__main__":
 	logger = Logger("main", False)
+	print("main logger opened")
 	try:
 		# read config file and load data
 		config_data = ""
 		file = open(config_filename, "r")
+		print("config file opened")
 		ignore_newline = False
 		while True:
 			line = file.readline()
@@ -134,13 +136,19 @@ if __name__ == "__main__":
 		config_data = config_data.rstrip()
 		# split data into groups by double or more newlines
 		config_data = re.split("\n{2,}", config_data)
+		print("config data read")
 		for group in config_data:
 			# run/trigger transmitter
+			print("starting thread with: %s" % group)
 			Transmitter(group).start()
+			print("thread is running")
 			break;
+		print("all thread are running")
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
 	except Exception as e:
+		print("ooops!!")
 		# something unexpected happened
 		logger.log("transmission failed!!")
 	logger.close()
+	print("logger closed. exiting...")
