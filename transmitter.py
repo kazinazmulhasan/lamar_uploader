@@ -86,10 +86,10 @@ class Transmitter(Thread):
 		# response = connection.getresponse().read().decode('utf-8')
 		# connection.close()
 		print("collecting data")
-		query = "%s?begin=%s&end=%s&period=%d" % (localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
+		query = "%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		for each in self.config.dependents.keys():
 			query += "&var=%s.%s" % (self.config.source, each)
-		print("making request")
+		print("making request with query: %s" % query)
 		res = requests.get(query)
 		print(res.text)
 		
