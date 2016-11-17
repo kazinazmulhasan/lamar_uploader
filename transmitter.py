@@ -88,7 +88,7 @@ class Transmitter(Thread):
 		
 		# process each record
 		for record in records:
-			print(record)
+			# print(record) # debug
 			# make a copy of target and dependents
 			targets = clone(self.config.targets)
 			dependents = clone(self.config.dependents)
@@ -97,7 +97,7 @@ class Transmitter(Thread):
 			# format datetime to match server/database format
 			rid = datetime.datetime.strptime(rid, "%d%m%Y%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
 			# find all the values we requested
-			matches = re.findall(r"([A-Z]+)</id><value>([^<]+)", record)
+			matches = re.findall(r"(\w+)</id><value>([^<]+)", record)
 			# convert the values to number and index/save them
 			for match in matches:
 				dependents[match[0]] = float(match[1])
@@ -106,9 +106,8 @@ class Transmitter(Thread):
 			for target in targets:
 				for i in range(len(targets[target])):
 					targets[target][i] = dependents[targets[target][i]]
-				print(targets)
+				# print(targets) # debug
 				targets[target] = sum(targets[target])
-			# print(self.config.dependents)
 			print(rid, end=" ")
 			print(targets)
 		
