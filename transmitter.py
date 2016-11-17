@@ -48,7 +48,7 @@ class Transmitter(Thread):
 	
 	def run(self):
 		self.logger.log("transmitter on")
-		self.get_last_datetime() and self.collect_data() and self.upload_data()
+		self.get_last_datetime() and self.collect_and_upload_data()
 		self.logger.log("transmitter off")
 		self.logger.close()
 
@@ -68,9 +68,6 @@ class Transmitter(Thread):
 			return False
 
 	def collect_data(self):
-		print(self.config.dependents)
-		print(self.config.targets)
-		
 		# build the query/url
 		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		# add all the variable names, we need to calculate our target variables
@@ -78,6 +75,8 @@ class Transmitter(Thread):
 			query += "&var=%s.%s" % (self.config.source, each)
 		# make the request
 		response = requests.get(query)
+		# log
+		self.logger.log("data collected")
 		
 		# parse the response data to records
 		# each record has different timestamp than others
@@ -88,7 +87,6 @@ class Transmitter(Thread):
 		
 		# process each record
 		for record in records:
-			# print(record) # debug
 			# make a copy of target and dependents
 			targets = clone(self.config.targets)
 			dependents = clone(self.config.dependents)
@@ -100,23 +98,28 @@ class Transmitter(Thread):
 			matches = re.findall(r"(\w+)</id><value>([^<]+)", record)
 			# convert the values to number and index/save them
 			for match in matches:
-				dependents[match[0]] = float(match[1])
+				dependents[match[0]] = round(float(match[1]), 6)
 			
 			# calculate target variables using values from dependents variables
 			for target in targets:
 				for i in range(len(targets[target])):
 					targets[target][i] = dependents[targets[target][i]]
-				# print(targets) # debug
 				targets[target] = sum(targets[target])
-			print(rid, end=" ")
-			print(targets)
-		
-		self.logger.log("data collected")
-		return True
+			ack = self.upload_data(rid, targets)
+			if not ack:
+				break
 
-	def upload_data(self):
-		self.logger.log("data has been uploaded")
-		return True
+	def upload_data(self, rid, values):
+		url = "http://%s%s" % (localserver_hostname, localserver_database_addr)
+		values["transmission"] = "true"
+		values["table"] = self.destination
+		response = requests.post(url, data=values).text
+		if response == "true":
+			self.logger.log("%s ACK", rid)
+			return True
+		else:
+			self.logger.log("%s NACK\nAborting", rid)
+			return False
 
 if __name__ == "__main__":
 	logger = Logger("main", False)
