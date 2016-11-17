@@ -52,12 +52,6 @@ class Transmitter(Thread):
 		self.logger.close()
 
 	def get_last_datetime(self):
-		# connection = network.HTTPSConnection(webserver_hostname)
-		# params = url.urlencode({"req":"last_datetime", "table":self.config.destination})
-		# connection.request("GET", webserver_receiver_addr+"?"+params)
-		# response = connection.getresponse().read().decode('utf-8')
-		# connection.close()
-		
 		query = "http://%s%s?req=last_datetime&table=%s" % (webserver_hostname, webserver_receiver_addr, self.config.destination)
 		response = requests.get(query).text
 		print(response)
@@ -73,6 +67,10 @@ class Transmitter(Thread):
 			return False
 
 	def collect_data(self):
+		print(self.config.dependents)
+		print(self.config.targets)
+		
+		return
 		# build the query/url
 		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		# add all the variable names, we need to calculate our target variables
