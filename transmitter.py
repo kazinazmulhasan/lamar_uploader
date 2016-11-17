@@ -48,7 +48,9 @@ class Transmitter(Thread):
 	
 	def run(self):
 		self.logger.log("transmitter on");
-		self.get_last_datetime2() and self.collect_data() and self.upload_data()
+		self.get_last_datetime2()
+		self.collect_data()
+		# self.upload_data()
 		self.logger.log("transmitter off");
 		self.logger.close()
 
