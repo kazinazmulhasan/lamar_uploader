@@ -71,7 +71,6 @@ class Transmitter(Thread):
 		print(self.config.dependents)
 		print(self.config.targets)
 		
-		return
 		# build the query/url
 		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		# add all the variable names, we need to calculate our target variables
