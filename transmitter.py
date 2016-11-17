@@ -88,6 +88,7 @@ class Transmitter(Thread):
 		
 		# process each record
 		for record in records:
+			print(record)
 			# make a copy of target and dependents
 			targets = clone(self.config.targets)
 			dependents = clone(self.config.dependents)
