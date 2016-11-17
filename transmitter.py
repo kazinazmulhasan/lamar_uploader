@@ -111,7 +111,7 @@ class Transmitter(Thread):
 
 	def upload_data(self, rid, values):
 		url = "http://%s%s" % (webserver_hostname, webserver_receiver_addr)
-		values["transmission"] = "true"
+		values["req"] = "transmission"
 		values["table"] = self.config.destination
 		response = requests.post(url, params=values).text
 		print(response)
