@@ -105,6 +105,7 @@ class Transmitter(Thread):
 			for target in targets:
 				for i in range(len(targets[target])):
 					targets[target][i] = dependents[targets[target][i]]
+				print(targets)
 				targets[target] = sum(targets[target])
 			# print(self.config.dependents)
 			print(rid, end=" ")
