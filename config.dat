@@ -11,31 +11,31 @@
 # 	calculated value will be uploaded as value of Y
 
 Barn -> barn
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 Bathhouse -> bathhouse
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 BuffaloKeepersHouse -> buffalokeepershouse
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 Bunkhouse -> bunkhouse
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 DirectorsCabin -> directorscabin
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 SodaButteRangerStation -> sodabutterangerstation
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 TrailLights_Cabin16-15 -> traillights
-PPPIII -> power
+PPIII -> power
 VLLIII -> voltage
 
 Cabin2-3-1 -> cabin1
