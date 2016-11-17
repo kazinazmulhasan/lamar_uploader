@@ -47,11 +47,11 @@ class Transmitter(Thread):
 		self.logger = Logger(self.config.destination)
 	
 	def run(self):
-		self.logger.log("transmitter on");
+		self.logger.log("transmitter on")
 		self.get_last_datetime2()
 		self.collect_data()
 		# self.upload_data()
-		self.logger.log("transmitter off");
+		self.logger.log("transmitter off")
 		self.logger.close()
 
 	def get_last_datetime(self):
@@ -84,10 +84,11 @@ class Transmitter(Thread):
 		# connection.request("GET", query)
 		# response = connection.getresponse().read().decode('utf-8')
 		# connection.close()
-		
+		print("collecting data")
 		query = "%s?begin=%s&end=%s&period=%d" % (localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		for each in self.config.dependents.keys():
 			query += "&var=%s.%s" % (self.config.source, each)
+		print("making request")
 		res = requests.get(query)
 		print(res.text)
 		
