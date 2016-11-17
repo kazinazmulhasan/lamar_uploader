@@ -91,10 +91,10 @@ class Transmitter(Thread):
 		# process each record
 		for record in records:
 			# make a copy of target and dependents
-			targets = self.config.targets.copy()
-			dependents = self.config.dependents.copy()
+			targets = self.config.targets[:]
+			dependents = self.config.dependents[:]
 			# extract datetime from record
-			rid = re.search("<dateTime>(\d+)", record).group(1)
+			rid = re.search(r"<dateTime>(\d+)", record).group(1)
 			# format datetime to match server/database format
 			rid = datetime.datetime.strptime(rid, "%d%m%Y%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
 			# find all the values we requested
@@ -109,6 +109,7 @@ class Transmitter(Thread):
 					targets[target][i] = dependents[targets[target][i]]
 				targets[target] = sum(targets[target])
 			# print(self.config.dependents)
+			print(rid, end=" ")
 			print(targets)
 		
 		self.logger.log("data collected")
