@@ -114,11 +114,12 @@ class Transmitter(Thread):
 		values["transmission"] = "true"
 		values["table"] = self.config.destination
 		response = requests.post(url, data=values).text
+		print(response)
 		if response == "true":
-			self.logger.log("%s ACK", rid)
+			self.logger.log("%s ACK" % rid)
 			return True
 		else:
-			self.logger.log("%s NACK\nAborting", rid)
+			self.logger.log("%s NACK\nAborting" % rid)
 			return False
 
 if __name__ == "__main__":
