@@ -73,26 +73,43 @@ class Transmitter(Thread):
 			return False
 
 	def collect_data(self):
+		# build the query/url
 		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
+		# add all the variable names, we need to calculate our target variables
 		for each in self.config.dependents.keys():
 			query += "&var=%s.%s" % (self.config.source, each)
+		# make the request
 		response = requests.get(query)
 		
+		# parse the response data to records
+		# each record has different timestamp than others
 		records = re.split("(?:</record>)*(?:<record>)", response.text)
+		# remove the first one from the stack
+		# the first one contains no record but xml info.
 		records.pop(0)
-		for record in records:
-			rid = re.search("<dateTime>(\d+)", record).group(1)
-			rid = datetime.datetime.strptime(rid, "%d%m%Y%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
-			matches = re.findall(r"([A-Z]+)</id><value>([^<]+)", record)
-			for match in matches:
-				self.config.dependents[match[0]] = float(match[1])
 		
-		for target in self.config.targets:
-			for i in range(len(self.config.targets[target])):
-				self.config.targets[target][i] = self.config.dependents[self.config.targets[target][i]]
-			self.config.targets[target] = sum(self.config.targets[target])
-		print(self.config.dependents)
-		print(self.config.targets)
+		# process each record
+		for record in records:
+			# make a copy of target and dependents
+			targets = self.config.targets.copy()
+			dependents = self.config.dependents.copy()
+			# extract datetime from record
+			rid = re.search("<dateTime>(\d+)", record).group(1)
+			# format datetime to match server/database format
+			rid = datetime.datetime.strptime(rid, "%d%m%Y%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
+			# find all the values we requested
+			matches = re.findall(r"([A-Z]+)</id><value>([^<]+)", record)
+			# convert the values to number and index/save them
+			for match in matches:
+				dependents[match[0]] = float(match[1])
+			
+			# calculate target variables using values from dependents variables
+			for target in targets:
+				for i in range(len(targets[target])):
+					targets[target][i] = dependents[targets[target][i]]
+				targets[target] = sum(targets[target])
+			# print(self.config.dependents)
+			print(targets)
 		
 		self.logger.log("data collected")
 		return True
