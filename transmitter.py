@@ -1,5 +1,3 @@
-import http.client as network
-import urllib.parse as url
 import datetime
 import re
 from threading import Thread
@@ -49,18 +47,20 @@ class Transmitter(Thread):
 	
 	def run(self):
 		self.logger.log("transmitter on")
-		self.get_last_datetime2()
-		self.collect_data()
-		# self.upload_data()
+		self.get_last_datetime() and self.collect_data() and self.upload_data()
 		self.logger.log("transmitter off")
 		self.logger.close()
 
 	def get_last_datetime(self):
-		connection = network.HTTPSConnection(webserver_hostname)
-		params = url.urlencode({"req":"last_datetime", "table":self.config.destination})
-		connection.request("GET", webserver_receiver_addr+"?"+params)
-		response = connection.getresponse().read().decode('utf-8')
-		connection.close()
+		# connection = network.HTTPSConnection(webserver_hostname)
+		# params = url.urlencode({"req":"last_datetime", "table":self.config.destination})
+		# connection.request("GET", webserver_receiver_addr+"?"+params)
+		# response = connection.getresponse().read().decode('utf-8')
+		# connection.close()
+		
+		query = "http://%s%s?req=last_datetime&table=%s" % (webserver_hostname, webserver_receiver_addr, self.config.destination)
+		response = requests.get(query).text
+		print(response)
 		
 		if response[0:4] == "true":
 			self.start_datetime = datetime.datetime.strptime(response[5:], "%Y-%m-%d %H:%M:%S")
@@ -71,20 +71,12 @@ class Transmitter(Thread):
 		else:
 			self.logger.log("failed to get last datetime!!")
 			return False
-	
-	def get_last_datetime2(self):
-		self.start_datetime = datetime.datetime.strptime("2016-11-14 00:00:00", "%Y-%m-%d %H:%M:%S")
-		self.end_datetime = datetime.datetime.strptime("2016-11-14 01:00:00", "%Y-%m-%d %H:%M:%S")
-		return True
 
 	def collect_data(self):
-		print("collecting data")
 		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		for each in self.config.dependents.keys():
 			query += "&var=%s.%s" % (self.config.source, each)
-		print("making request with query: %s" % query)
 		response = requests.get(query)
-		print(response.text)
 		
 		records = re.split("(?:</record>)*(?:<record>)", response.text)
 		records.pop(0)
@@ -134,9 +126,7 @@ if __name__ == "__main__":
 		print("config data read")
 		for group in config_data:
 			# run/trigger transmitter
-			print("starting thread with: %s" % group)
 			Transmitter(group).start()
-			print("thread is running")
 			break;
 		print("all thread are running")
 		# we successfully ran/triggered all the transmitters
