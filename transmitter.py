@@ -1,6 +1,7 @@
+from threading import Thread
+from copy import deepcopy as clone
 import datetime
 import re
-from threading import Thread
 import requests
 
 config_filename = "config.dat"
@@ -89,8 +90,8 @@ class Transmitter(Thread):
 		# process each record
 		for record in records:
 			# make a copy of target and dependents
-			targets = self.config.targets[:]
-			dependents = self.config.dependents[:]
+			targets = clone(self.config.targets)
+			dependents = clone(self.config.dependents)
 			# extract datetime from record
 			rid = re.search(r"<dateTime>(\d+)", record).group(1)
 			# format datetime to match server/database format
