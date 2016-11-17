@@ -112,7 +112,7 @@ class Transmitter(Thread):
 	def upload_data(self, rid, values):
 		url = "http://%s%s" % (localserver_hostname, localserver_database_addr)
 		values["transmission"] = "true"
-		values["table"] = self.destination
+		values["table"] = destination
 		response = requests.post(url, data=values).text
 		if response == "true":
 			self.logger.log("%s ACK", rid)
