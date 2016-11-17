@@ -98,7 +98,8 @@ class Transmitter(Thread):
 		for target in self.config.targets:
 			for i in range(len(self.config.targets[target])):
 				self.config.targets[target][i] = self.config.dependents[self.config.targets[target][i]]
-			self.config.targets[target] = sum(self.config.targets[target])
+			# self.config.targets[target] = sum(self.config.targets[target])
+		print(self.config.dependents)
 		print(self.config.targets)
 		
 		self.logger.log("data collected")
