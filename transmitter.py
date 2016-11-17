@@ -113,6 +113,7 @@ class Transmitter(Thread):
 		url = "http://%s%s" % (webserver_hostname, webserver_receiver_addr)
 		values["req"] = "transmission"
 		values["table"] = self.config.destination
+		value["id"] = rid
 		response = requests.post(url, params=values).text
 		print(response)
 		if response == "true":
