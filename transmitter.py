@@ -110,7 +110,7 @@ class Transmitter(Thread):
 				break
 
 	def upload_data(self, rid, values):
-		url = "http://%s%s" % (localserver_hostname, localserver_database_addr)
+		url = "http://%s%s" % (webserver_hostname, webserver_receiver_addr)
 		values["transmission"] = "true"
 		values["table"] = destination
 		response = requests.post(url, data=values).text
