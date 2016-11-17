@@ -78,22 +78,15 @@ class Transmitter(Thread):
 		return True
 
 	def collect_data(self):
-		# connection = network.HTTPSConnection(localserver_hostname)
-		# query = "%s?begin=%s&end=%s&period=%d" % (localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
-		# for each in self.config.dependents.keys():
-		# 	query += "&var=%s.%s" % (self.config.source, each)
-		# connection.request("GET", query)
-		# response = connection.getresponse().read().decode('utf-8')
-		# connection.close()
 		print("collecting data")
 		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		for each in self.config.dependents.keys():
 			query += "&var=%s.%s" % (self.config.source, each)
 		print("making request with query: %s" % query)
-		res = requests.get(query)
-		print(res.text)
+		response = requests.get(query)
+		print(response.text)
 		
-		records = re.split("(?:</record>)*(?:<record>)", response)
+		records = re.split("(?:</record>)*(?:<record>)", response.text)
 		records.pop(0)
 		for record in records:
 			rid = re.search("<dateTime>(\d+)", record).group(1)
