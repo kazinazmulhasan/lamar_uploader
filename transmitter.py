@@ -93,13 +93,13 @@ class Transmitter(Thread):
 			rid = datetime.datetime.strptime(rid, "%d%m%Y%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
 			matches = re.findall(r"([A-Z]+)</id><value>([^<]+)", record)
 			for match in matches:
-				self.dependents[match[0]] = float(match[1])
+				self.config.dependents[match[0]] = float(match[1])
 		
-		for target in self.targets:
-			for i in range(len(self.targets[target])):
-				self.targets[target][i] = self.dependents[self.targets[target][i]]
-			self.targets[target] = sum(self.targets[target])
-		print(self.targets)
+		for target in self.config.targets:
+			for i in range(len(self.config.targets[target])):
+				self.config.targets[target][i] = self.config.dependents[self.config.targets[target][i]]
+			self.config.targets[target] = sum(self.config.targets[target])
+		print(self.config.targets)
 		
 		self.logger.log("data collected")
 		return True
