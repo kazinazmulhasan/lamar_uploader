@@ -115,6 +115,7 @@ class Transmitter(Thread):
 		values["table"] = self.config.destination
 		values["id"] = rid
 		response = requests.post(url, params=values).text
+		print(values, end=" ")
 		print(response)
 		if response == "true":
 			self.logger.log("%s ACK" % rid)
