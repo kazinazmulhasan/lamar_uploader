@@ -63,6 +63,7 @@ class Transmitter(Thread):
 		self.logger.log("transmitter off")
 		# close logger
 		self.logger.close()
+		print(datetime.datetime.now())
 
 	def get_last_datetime(self):
 		# build the query
@@ -151,13 +152,13 @@ class Transmitter(Thread):
 			return False
 
 if __name__ == "__main__":
+	print(datetime.datetime.now())
 	# open main logger
 	logger = Logger("main", False)
 	try:
 		# read config file and load data
 		config_data = ""
 		file = open(config_filename, "r")
-		print("config file opened")
 		ignore_newline = False
 		while True:
 			line = file.readline()
@@ -175,7 +176,6 @@ if __name__ == "__main__":
 		for group in config_data:
 			# run/trigger transmitter
 			Transmitter(group).start()
-			break;
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
 	except Exception as e:
