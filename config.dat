@@ -10,9 +10,9 @@
 # 	be collected and added together. Afterward the 
 # 	calculated value will be uploaded as value of Y
 
-Barn -> barn
-PPIII -> power
-VLLIII -> voltage
+# Barn -> barn
+# PPIII -> power
+# VLLIII -> voltage
 
 Bathhouse -> bathhouse
 PPIII -> power
@@ -36,6 +36,10 @@ VLLIII -> voltage
 
 TrailLights_Cabin16-15 -> traillights
 PP1 -> power
+VLLIII -> voltage
+
+SewagePump_Unknown_Store -> store
+PP3 -> power
 VLLIII -> voltage
 
 Cabin2-3-1 -> cabin1
