@@ -1,3 +1,13 @@
+'''
+The program will parse the config file and for each house/building mentioned
+in the config file, system will create a new thread and run program to collect
+data from the server for specified house/building. Since system will create
+a new thread for each house/building, one's failure won't affect another's
+operation.
+
+@author Kazi, Nazmul (Naz)
+'''
+
 from threading import Thread
 from copy import deepcopy as clone
 import datetime
@@ -5,10 +15,8 @@ import re
 import requests
 
 config_filename = "config.dat"
-webserver_hostname = "oxiago.com"
-webserver_receiver_addr = "/lamar/receiver.php"
-localserver_hostname = "192.168.101.113"
-localserver_database_addr = "/services/user/records.xml"
+remoteserver = "http://oxiago.com/lamar/receiver.php"
+localserver = "http://192.168.101.113/services/user/records.xml"
 update_interval = 30 # in minutes
 
 class Logger:
@@ -43,33 +51,46 @@ class Config:
 class Transmitter(Thread):
 	def __init__(self, config):
 		Thread.__init__(self)
+		# parse configuration
 		self.config = Config(config)
+		# open logger for logging
 		self.logger = Logger(self.config.destination)
 	
 	def run(self):
 		self.logger.log("transmitter on")
+		# get last datetime from remote server, then collect data, then upload data
 		self.get_last_datetime() and self.collect_and_upload_data()
 		self.logger.log("transmitter off")
+		# close logger
 		self.logger.close()
 
 	def get_last_datetime(self):
-		query = "http://%s%s?req=last_datetime&table=%s" % (webserver_hostname, webserver_receiver_addr, self.config.destination)
+		# build the query
+		query = "%s?req=last_datetime&table=%s" % (remoteserver, self.config.destination)
+		# make the request
 		response = requests.get(query).text
-		print(response)
 		
+		# analyse response from remote server
 		if response[0:4] == "true":
+			# set start date
 			self.start_datetime = datetime.datetime.strptime(response[5:], "%Y-%m-%d %H:%M:%S")
+			# the last datetime we receive already exist in the database
+			# so we need to add the update interval time to avoid this record
 			self.start_datetime += datetime.timedelta(0, update_interval*60)
+			# set end datetime to current time
 			self.end_datetime = datetime.datetime.now()
 			self.logger.log("last datetime received: "+response[5:])
+			# return true, otherwise next operation won't run
 			return True
 		else:
+			# didnt receive any datetime from remote server
 			self.logger.log("failed to get last datetime!!")
+			# abort
 			return False
 
 	def collect_and_upload_data(self):
 		# build the query/url
-		query = "http://%s%s?begin=%s&end=%s&period=%d" % (localserver_hostname, localserver_database_addr, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
+		query = "%s?begin=%s&end=%s&period=%d" % (localserver, self.start_datetime.strftime("%d%m%Y%H%M%S"), self.end_datetime.strftime("%d%m%Y%H%M%S"), update_interval*60)
 		# add all the variable names, we need to calculate our target variables
 		for each in self.config.dependents.keys():
 			query += "&var=%s.%s" % (self.config.source, each)
@@ -105,28 +126,33 @@ class Transmitter(Thread):
 				for i in range(len(targets[target])):
 					targets[target][i] = dependents[targets[target][i]]
 				targets[target] = sum(targets[target])
+			# upload data
+			# if server didnt get the data, abort
+			# aborting is imprtant. this way we wont 
+			# have missing data in the middle
+			# rest of the data will be uploaded in
+			# the beginning of next transmission
 			ack = self.upload_data(rid, targets)
 			if not ack:
 				break
 
 	def upload_data(self, rid, values):
-		url = "http://%s%s" % (webserver_hostname, webserver_receiver_addr)
+		# set required parameters
 		values["req"] = "transmission"
 		values["table"] = self.config.destination
-		values["id"] = rid
-		response = requests.post(url, params=values).text
-		print(values, end=" ")
-		print(response)
-		if response == "true":
+		values["id"] = rid # rid stands for record id and it is datetime of the record 
+		# make the request
+		response = requests.post(remoteserver, params=values).text
+		if response == "true": # data has been ackowledged (ACK)
 			self.logger.log("%s ACK" % rid)
 			return True
 		else:
-			self.logger.log("%s NACK\nAborting" % rid)
+			self.logger.log("%s NACK\nAborting" % rid) # NACK stands for Not ACKnowledged
 			return False
 
 if __name__ == "__main__":
+	# open main logger
 	logger = Logger("main", False)
-	print("main logger opened")
 	try:
 		# read config file and load data
 		config_data = ""
@@ -146,17 +172,13 @@ if __name__ == "__main__":
 		config_data = config_data.rstrip()
 		# split data into groups by double or more newlines
 		config_data = re.split("\n{2,}", config_data)
-		print("config data read")
 		for group in config_data:
 			# run/trigger transmitter
 			Transmitter(group).start()
 			break;
-		print("all thread are running")
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
 	except Exception as e:
-		print("ooops!!")
 		# something unexpected happened
 		logger.log("transmission failed!!")
 	logger.close()
-	print("logger closed. exiting...")

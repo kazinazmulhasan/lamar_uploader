@@ -35,69 +35,69 @@ PPIII -> power
 VLLIII -> voltage
 
 TrailLights_Cabin16-15 -> traillights
-PPIII -> power
+PP1 -> power
 VLLIII -> voltage
 
 Cabin2-3-1 -> cabin1
-PP -> power
-V -> voltage
+PP3 -> power
+VLLIII -> voltage
 
 Cabin2-3-1 -> cabin2
-PP -> power
-V -> voltage
+PP1 -> power
+VLLIII -> voltage
 
 Cabin2-3-1 -> cabin3
-PP -> power
-V -> voltage
+PP2 -> power
+VLLIII -> voltage
 
 Cabin6-5-4 -> cabin4
-PP -> power
-V -> voltage
+PP3 -> power
+VLLIII -> voltage
 
 Cabin6-5-4 -> cabin5
-PP -> power
-V -> voltage
+PP2 -> power
+VLLIII -> voltage
 
 Cabin6-5-4 -> cabin6
-PP -> power
-V -> voltage
+PP1 -> power
+VLLIII -> voltage
 
 Cabin9-8-7 -> cabin7
-PP -> power
-V -> voltage
+PP3 -> power
+VLLIII -> voltage
 
 Cabin9-8-7 -> cabin8
-PP -> power
-V -> voltage
+PP2 -> power
+VLLIII -> voltage
 
 Cabin9-8-7 -> cabin9
-PP -> power
-V -> voltage
+PP1 -> power
+VLLIII -> voltage
 
 Cabin11-10_Spare -> cabin10
-PP -> power
-V -> voltage
+PP2 -> power
+VLLIII -> voltage
 
 Cabin11-10_Spare -> cabin11
-PP -> power
-V -> voltage
+PP1 -> power
+VLLIII -> voltage
 
 Cabin14-13-12 -> cabin12
-PP -> power
-V -> voltage
+PP3 -> power
+VLLIII -> voltage
 
 Cabin14-13-12 -> cabin13
-PP -> power
-V -> voltage
+PP2 -> power
+VLLIII -> voltage
 
 Cabin14-13-12 -> cabin14
-PP -> power
-V -> voltage
+PP1 -> power
+VLLIII -> voltage
 
 TrailLights_Cabin16-15 -> cabin15
-PP -> power
-V -> voltage
+PP3 -> power
+VLLIII -> voltage
 
 TrailLights_Cabin16-15 -> cabin16
-PP -> power
-V -> voltage
+PP2 -> power
+VLLIII -> voltage
