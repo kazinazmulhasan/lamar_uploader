@@ -10,9 +10,9 @@
 # 	be collected and added together. Afterward the 
 # 	calculated value will be uploaded as value of Y
 
-# Barn -> barn
-# PPIII -> power
-# VLLIII -> voltage
+Barn -> barn
+PPIII -> power
+VLLIII -> voltage
 
 Bathhouse -> bathhouse
 PPIII -> power
