@@ -13,11 +13,33 @@ from copy import deepcopy as clone
 import datetime
 import re
 import requests
+from time import *
 
 config_filename = "config.dat"
+
+# This page will receive all the data we pull from EDS server,
+# will decide what to do with the data and will send a reply
+# based on what this system will decide what to do next
 remoteserver = "http://oxiago.com/lamar/receiver.php"
+
+# address of EDS server
 localserver = "http://192.168.101.113/services/user/records.xml"
+
+# update interval is how often EDS server records the data
+# this is not how often we should pull the data
+# wrong value for update interval can result in receiving
+# no data or less data from EDS server.
 update_interval = 30 # in minutes
+# TTL stands for Time to Live, if a thread is still running
+# after ttl, the thread will be terminated forcefully by the
+# parent thread. start time doesn't depend on child threads.
+# as soon as the parent thread will be executed the clock will
+# start ticking.
+# thread_TTL must be not greater than update_interval - 5
+# this way all threads will be terminated 5 mins before the
+# program will be executed again.
+# However, average run time of this program is 4 seconds
+thread_TTL = 25 # in minutes
 
 class Logger:
 	def __init__(self, filename, grouping=True):
@@ -55,6 +77,7 @@ class Transmitter(Thread):
 		self.config = Config(config)
 		# open logger for logging
 		self.logger = Logger(self.config.destination)
+		self.stop = False
 	
 	def run(self):
 		self.logger.log("transmitter on")
@@ -109,6 +132,8 @@ class Transmitter(Thread):
 		
 		# process each record
 		for record in records:
+			if self.stop:
+				break
 			# make a copy of target and dependents
 			targets = clone(self.config.targets)
 			dependents = clone(self.config.dependents)
@@ -156,6 +181,8 @@ if __name__ == "__main__":
 	# open main logger
 	logger = Logger("main", False)
 	try:
+		# list of transmitters
+		transmitter_L = []
 		# read config file and load data
 		config_data = ""
 		file = open(config_filename, "r")
@@ -173,9 +200,30 @@ if __name__ == "__main__":
 		config_data = config_data.rstrip()
 		# split data into groups by double or more newlines
 		config_data = re.split("\n{2,}", config_data)
+		# create a thread for each group
 		for group in config_data:
-			# run/trigger transmitter
-			Transmitter(group).start()
+			transmitter_L.append(Transmitter(group))
+		# start/run all the threads/transmitters
+		for transmitter in transmitter_L:
+			transmitter.start()
+		# check if all threads are dead or not
+		# if not, check again after 1 min
+		# if yes, join all the threads with parent thread and exit
+		while thread_TTL > 0:
+			# check if all threads are dead
+			all_dead = True
+			for transmitter in transmitter_L:
+				if Transmitter.isAlive(): # still running
+					all_dead = False
+			# all threads are dead, kill/join all with parent
+			if all_dead:
+				for transmitter in transmitter_L:
+					transmitter.join()
+			# wait another minute, check again
+			else:
+				thread_TTL -= 1
+				sleep(1)
+			
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
 	except Exception as e:
