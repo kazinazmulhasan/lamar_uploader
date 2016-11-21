@@ -209,13 +209,13 @@ if __name__ == "__main__":
 		# check if all threads are dead or not
 		# if not, check again after 1 min
 		# if yes, join all the threads with parent thread and exit
-		while thread_TTL > 0:
+		while thread_TTL > 1:
 			# check if all threads are dead
 			all_dead = True
 			for transmitter in transmitter_L:
 				if Transmitter.isAlive(): # still running
 					all_dead = False
-			# all threads are dead, kill/join all with parent
+			# no thread is running, kill/join all with parent
 			if all_dead:
 				for transmitter in transmitter_L:
 					transmitter.join()
@@ -223,6 +223,16 @@ if __name__ == "__main__":
 			else:
 				thread_TTL -= 1
 				sleep(1)
+		# system had enough time to finish it's task but we can't allow
+		# anymore time. We need to start killing all the thread before
+		# next program runs.
+		if thread_TTL <= 1:
+			# request to stop processing and return to parent
+			for transmitter in transmitter_L:
+				transmitter.stop = True
+			# join all with parent
+			for transmitter in transmitter_L:
+				transmitter.join()
 			
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
