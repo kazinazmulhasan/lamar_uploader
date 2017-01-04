@@ -39,7 +39,7 @@ update_interval = 30 # in minutes
 # this way all threads will be terminated 5 mins before the
 # program will be executed again.
 # However, average run time of this program is 4 seconds
-thread_TTL = 2 # in minutes
+thread_TTL = 25 # in minutes
 
 class Logger:
 	def __init__(self, filename, grouping=True):
@@ -164,8 +164,6 @@ class Transmitter(Thread):
 				break
 
 	def upload_data(self, rid, values):
-		# for debugging
-		return True
 		# set required parameters
 		values["req"] = "transmission"
 		values["table"] = self.config.destination
