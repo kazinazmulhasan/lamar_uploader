@@ -29,7 +29,7 @@ localserver = "http://192.168.101.113/services/user/records.xml"
 # this is not how often we should pull the data
 # wrong value for update interval can result in receiving
 # no data or less data from EDS server.
-update_interval = 30 # in minutes
+update_interval = 2 # in minutes
 # TTL stands for Time to Live, if a thread is still running
 # after ttl, the thread will be terminated forcefully by the
 # parent thread. start time doesn't depend on child threads.
@@ -71,13 +71,14 @@ class Config:
 				self.dependents[each] = ""
 
 class Transmitter(Thread):
+	stop = False
+	
 	def __init__(self, config):
 		Thread.__init__(self)
 		# parse configuration
 		self.config = Config(config)
 		# open logger for logging
 		self.logger = Logger(self.config.destination)
-		self.stop = False
 	
 	def run(self):
 		self.logger.log("transmitter on")
