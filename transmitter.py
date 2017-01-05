@@ -71,10 +71,9 @@ class Config:
 				self.dependents[each] = ""
 
 class Transmitter(Thread):
-	stop = False
-	
 	def __init__(self, config):
 		Thread.__init__(self)
+		self.stop = False
 		# parse configuration
 		self.config = Config(config)
 		# open logger for logging
@@ -176,8 +175,12 @@ class Transmitter(Thread):
 		else:
 			self.logger.log("%s NACK\nAborting" % rid) # NACK stands for Not ACKnowledged
 			return False
+	
+	def stop_thread(self):
+		self.stop = True
 
 if __name__ == "__main__":
+	# for debugging
 	print(datetime.datetime.now())
 	# open main logger
 	logger = Logger("main", False)
@@ -210,33 +213,42 @@ if __name__ == "__main__":
 		# check if all threads are dead or not
 		# if not, check again after 1 min
 		# if yes, join all the threads with parent thread and exit
-		while thread_TTL > 1:
+		# print("controlling thread")
+		while thread_TTL > 0:
 			# check if all threads are dead
 			all_dead = True
 			for transmitter in transmitter_L:
-				if Transmitter.isAlive(): # still running
+				if transmitter.isAlive(): # still running
 					all_dead = False
 			# no thread is running, kill/join all with parent
 			if all_dead:
+				# print("all threads are dead")
 				for transmitter in transmitter_L:
 					transmitter.join()
+				break
 			# wait another minute, check again
 			else:
 				thread_TTL -= 1
-				sleep(1)
+				# print("sleeping")
+				sleep(60)
 		# system had enough time to finish it's task but we can't allow
 		# anymore time. We need to start killing all the thread before
 		# next program runs.
-		if thread_TTL <= 1:
+		if thread_TTL < 1:
 			# request to stop processing and return to parent
 			for transmitter in transmitter_L:
-				transmitter.stop = True
+				transmitter.stop_thread()
+			# sleep a second before joining all threads
+			sleep(1)
 			# join all with parent
 			for transmitter in transmitter_L:
 				transmitter.join()
 			
 		# we successfully ran/triggered all the transmitters
 		logger.log("transmission successful")
+		# # for debugging
+		# print("exiting at ", end="")
+		# print(datetime.datetime.now())
 	except Exception as e:
 		# something unexpected happened
 		logger.log("transmission failed!!")
