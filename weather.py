@@ -22,14 +22,15 @@ logger = Logger("weather")
 this function will collect data from website
 '''
 def collect_data():
-	# get raw data
+	# get raw data/source code of the webpage
 	data = requests.get(source_address).text
 	# parse date and time
 	date = re.findall("Most Recent Weather Conditions at:\s*(\d+)/(\d+)/(\d+)\s*(\d+):(\d+)", data)[0]
 	# format date into mysql accepted format
-	date = "%s-%s-%s %s:%s:00" % (date[2],date[0],date[1],date[3],date[4])
+	date = "%s-%s-%s " % (date[2],date[0],date[1])
 	# store the date
-	weather_data.append(date)
+	for i in range(4):
+		weather_data.append([date])
 	# for debugging
 	# print(date)
 	
@@ -38,40 +39,48 @@ def collect_data():
 	# for single line searching and ease of parsing data
 	data = re.sub(r"\s+", " ", data)
 	# search the table that contains the weather data
-	data = re.search("<table.*?(?=</table)", data).group(0)
+	# the target table is the third/last table in the page
+	data = re.findall("<table.*?(?=</table)", data)[2]
+	
 	# retrive the rows from the table
 	data = re.findall("<tr.*?(?=</tr)", data)
-	
-	# start collecting data
-	# get temperature
-	weather_data.append(re.findall("<b>[^\d.-]*([\d.-]*)[^>]*?(?=</b)", data[1])[0])
-	# get humidity
-	weather_data.append(re.findall("<b>[^\d.-]*([\d.-]*)[^>]*?(?=</b)", data[4])[0])
-	# get wind speed
-	weather_data.append(re.findall("<b>[^\d.-]*([\d.-]*)[^>]*?(?=</b)", data[5])[0])
-	# get humidity
-	weather_data.append(re.findall("<b>[^\d.-]*([\d.-]*)[^>]*?(?=</b)", data[8])[0])
-	logger.log("data has been collected")
-	# for debugging
-	# print(weather_data)
+	# remove the first row that contains title of the columns
+	data.pop(0)
+	# parse weather data from next 4 rows
+	for i in range(4):
+		parse_weather_data(i, data[i])
 
+def parse_weather_data(index, text):
+	# find all the values
+	values = re.findall("([\d.:]*)</td>", text)
+	
+	# update the date
+	weather_data[index][0] += values[0].zfill(5)+":00"
+	# save the weather data
+	weather_data[index].append(values[1]) # temperature
+	weather_data[index].append(values[4]) # humidity
+	weather_data[index].append(values[5]) # wind speed
+	weather_data[index].append(values[8]) # solar radiation
+	logger.log("data has been collected for %s" % values[0].zfill(5))
+	
 # this function will upload the collected data in the server
-def upload_data():
+def upload_data(data):
 	# build the url/query
 	values = {}
 	# include metadata
 	values["req"] = "transmission"
 	values["table"] = "weather"
 	# include collected data
-	values["id"] = weather_data[0]
-	values["temperature"] = weather_data[1]
-	values["humidity"] = weather_data[2]
-	values["wind_speed"] = weather_data[3]
-	values["solar_radiation"] = weather_data[4]
+	values["id"] = data[0]
+	values["temperature"] = data[1]
+	values["humidity"] = data[2]
+	values["wind_speed"] = data[3]
+	values["solar_radiation"] = data[4]
 	# upload data
 	response = requests.post(remoteserver, params=values).text
+	# response = "true"
 	# log
-	logger.log("data has been uploaded" if response == "true" else "failed to upload data")
+	logger.log("data has been uploaded for %s" % data[0][11:16] if response == "true" else "failed to upload data")
 
 if __name__ == "__main__":
 	# for debugging
@@ -81,7 +90,9 @@ if __name__ == "__main__":
 		# try to collect weather data
 		collect_data()
 		# try to upload collected data
-		upload_data()
+		for i in range(4):
+			upload_data(weather_data[i])
+			# print(weather_data[i])
 	except Exception as e:
 		# something unexpected happened
 		# log the error for record and debugging help
