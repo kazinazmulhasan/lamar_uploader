@@ -17,20 +17,21 @@ remoteserver = "http://oxiago.com/lamar/receiver.php"
 # required variables
 weather_data = []
 logger = Logger("weather")
+date = ""
 
 '''
 this function will collect data from website
 '''
 def collect_data():
+	global date
 	# get raw data/source code of the webpage
 	data = requests.get(source_address).text
 	# parse date and time
 	date = re.findall("Most Recent Weather Conditions at:\s*(\d+)/(\d+)/(\d+)\s*(\d+):(\d+)", data)[0]
 	# format date into mysql accepted format
-	date = "%s-%s-%s " % (date[2],date[0],date[1])
-	# store the date
-	for i in range(4):
-		weather_data.append([date])
+	date = "%s-%s-%s %s:%s:%s" % (date[2],date[0],date[1],date[3],date[4],"00")
+	# convert it into a date class
+	date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
 	# for debugging
 	# print(date)
 	
@@ -48,21 +49,30 @@ def collect_data():
 	data.pop(0)
 	# parse weather data from next 4 rows
 	for i in range(4):
+		weather_data.append([])
 		parse_weather_data(i, data[i])
 
 def parse_weather_data(index, text):
 	# find all the values
 	values = re.findall("([\d.:]*)</td>", text)
-	
 	# update the date
-	weather_data[index][0] += values[0].zfill(5)+":00"
+	weather_data[index].append(get_date()) # date
 	# save the weather data
 	weather_data[index].append(values[1]) # temperature
 	weather_data[index].append(values[4]) # humidity
 	weather_data[index].append(values[5]) # wind speed
 	weather_data[index].append(values[8]) # solar radiation
 	logger.log("data has been collected for %s" % values[0].zfill(5))
-	
+
+def get_date():
+	global date
+	# store current date value to return
+	old_date = str(date)
+	# update date
+	date -= datetime.timedelta(minutes=15)
+	# return old date value
+	return old_date
+
 # this function will upload the collected data in the server
 def upload_data(data):
 	# build the url/query
